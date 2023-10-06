@@ -6,7 +6,7 @@ dotenv.config();
 const {Pool} = pg;
 
 const configDatabase = {
-    connectionString: process.env.DATABASE_URL,
+    connectionString: 'postgres://postgres:123@localhost:5432/mecansei'
 };
 
 if (process.env.NODE_ENV === "production") configDatabase.ssl = true;

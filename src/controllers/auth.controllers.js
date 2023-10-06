@@ -12,12 +12,12 @@ export async function signUp(req, res) {
     }
 
     try {
-        const userExists = await db.query(`SELECT * FROM user WHERE email = $1;`, [email]);
+        const userExists = await db.query(`SELECT * FROM "user" WHERE email = $1;`, [email]);
         if (userExists.rowCount !== 0) {
             return res.status(400).send("Este e-mail já foi cadastrado.");
         }
 
-        await db.query(`INSER INTO user(email, password, name, cpf, telephone) VALUES($1, $2, $3, $4, $5);`, [email, password, name, cpf, telephone]);
+        await db.query(`INSERT INTO "user"(email, password, name, cpf, telephone) VALUES($1, $2, $3, $4, $5);`, [email, password, name, cpf, telephone]);
 
         res.status(201).send("Usuário criado com sucesso!");
 
