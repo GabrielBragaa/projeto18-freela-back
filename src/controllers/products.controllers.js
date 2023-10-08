@@ -71,6 +71,26 @@ export async function getProductById(req, res) {
     }
 }
 
+export async function getMyProducts(req, res) {
+    const {authorization} = req.headers;
+    const token = authorization?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).send("Você precisa estar logado para realizar esta ação.");
+    }
+
+    try {
+        const userId = await db.query(`SELECT "userId" FROM sessions WHERE token = $1;`, [token]);
+        const products = await db.query(`SELECT user_product.*, product.*
+        FROM user_product
+        JOIN product ON product.id = user_product."productId"
+        WHERE "userId" = $1;`, [userId.rows[0].userId]);
+
+        res.status(200).send(products.rows)
+    } catch (err) {
+        return res.status(500).send(err);
+    }
+}
+
 export async function deleteProduct(req, res) {
     const {id} = req.params;
     const {authorization} = req.headers;
