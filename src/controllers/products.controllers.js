@@ -70,3 +70,34 @@ export async function getProductById(req, res) {
         return res.status(500).send(err)
     }
 }
+
+export async function deleteProduct(req, res) {
+    const {id} = req.params;
+    const {authorization} = req.headers;
+    const token = authorization?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).send("Você precisa estar logado para realizar esta ação.");
+    }
+
+    try {
+        const product = await db.query(`SELECT * FROM product WHERE id = $1;`, [id]);
+        if (product.rowCount === 0) {
+            return res.status(404).send("Esse produto não existe.")
+        }
+
+        const userId = await db.query(`SELECT "userId" FROM sessions WHERE token = $1;`, [token]);
+        const products = await db.query(`SELECT * FROM user_product WHERE "userId" = $1;`, [userId.rows[0].userId]);
+        const userProducts = products.rows.filter(prod => prod.id === id);
+        if(userProducts.length === 0) {
+            return res.status(422).send("O usuário não tem permissão para excluir este produto.")
+        }
+
+        await db.query(`DELETE FROM product_category WHERE "productId" = $1;`, [id]);
+        await db.query(`DELETE FROM user_product WHERE "productId" = $1;`, [id]);
+        await db.query(`DELETE FROM product WHERE id = $1;`, [id]);
+
+        res.status(204).send("Produto excluído.")
+    } catch (err) {
+        return res.status(500).send(err)
+    }
+}
