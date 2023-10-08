@@ -43,10 +43,13 @@ export async function getProducts(req, res) {
     }
 
     try {
-        const products = await db.query(`SELECT product.*, category.name AS "category"
+        const products = await db.query(`SELECT product.*, category.name AS "category", "user"."name" AS "createdBy"
         FROM product 
-        JOIN product_category ON "productId" = product.id
-        JOIN category ON category.id = "categoryId";`);
+        JOIN product_category ON product_category."productId" = product.id
+        JOIN category ON category.id = "categoryId"
+        JOIN user_product ON user_product."productId" = product.id
+        JOIN "user" ON "user"."id" = user_product."userId";
+        `);
         res.status(200).send(products.rows);
     } catch (err) {
         return res.status(500).send(err);
