@@ -32,7 +32,8 @@ export async function getProducts(req, res) {
     }
 
     try {
-
+        const products = await db.query(`SELECT * FROM product;`);
+        res.status(200).send(products.rows);
     } catch (err) {
         return res.status(500).send(err);
     }
