@@ -43,15 +43,30 @@ export async function getProducts(req, res) {
     }
 
     try {
-        const products = await db.query(`SELECT product.*, category.name AS "category", "user"."name" AS "createdBy"
+        const products = await db.query(`SELECT product.*, category.name AS "category", "user".name AS "createdBy", "user".cpf, "user".telephone
         FROM product 
         JOIN product_category ON product_category."productId" = product.id
         JOIN category ON category.id = "categoryId"
         JOIN user_product ON user_product."productId" = product.id
-        JOIN "user" ON "user"."id" = user_product."userId";
+        JOIN "user" ON "user"."id" = user_product."userId";        
         `);
         res.status(200).send(products.rows);
     } catch (err) {
         return res.status(500).send(err);
+    }
+}
+
+export async function getProductById(req, res) {
+    const {id} = req.params;
+
+    try {
+        const product = await db.query(`SELECT * FROM product WHERE id = $1;`, [id]);
+        if (product.rowCount === 0) {
+            return res.status(422).send("Esse produto não existe.")
+        }
+
+        res.status(200).send(product.rows[0]);
+    } catch (err) {
+        return res.status(500).send(err)
     }
 }
