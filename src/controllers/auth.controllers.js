@@ -4,14 +4,10 @@ import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
 export async function signUp(req, res) {
-    const {email, password, name, cpf, telephone, confirmPassword} = req.body;
+    const {email, password, name, cpf, telephone} = req.body;
     const user = {email, password, name, cpf, telephone};
     const validation = signUpSchema.validate(user, {abortEarly: false});
     
-    if (password !== confirmPassword) {
-        return res.status(422).send("As senhas não coincidem.");
-    }
-
     if (validation.error) {
         const errors = validation.error.details.map(detail => detail.message);
         return res.status(400).send(errors);
